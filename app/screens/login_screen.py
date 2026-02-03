@@ -18,7 +18,7 @@ class LoginScreen(Screen):
                            padding=[dp(40), dp(100), dp(40), dp(100)])
 
         # Title
-        title = Label(text="SoftJus",
+        title = Label(text="IASoftJus",
                       font_size='28sp',
                       color=get_color_from_hex('#1976D2'),
                       bold=True)
