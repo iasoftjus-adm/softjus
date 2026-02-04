@@ -8,7 +8,7 @@ from app.screens.dashboard_screen import DashboardScreen
 
 class ProcessoApp(App):
     def build(self):
-        self.title = "SoftJus"
+        self.title = "IASoftJus"
         Window.size = (1000, 700)
 
         # Create screen manager
