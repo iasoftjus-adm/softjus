@@ -3,7 +3,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.togglebutton import ToggleButton
-from kivy.uix.dropdown import DropDown
 from kivy.uix.spinner import Spinner
 from kivy.metrics import dp
 from kivy.utils import get_color_from_hex
@@ -24,6 +23,7 @@ class DashboardScreen(Screen):
         self.setup_ui()
 
     def setup_ui(self):
+        # Layout principal
         layout = BoxLayout(orientation='vertical', spacing=dp(10), padding=dp(15))
 
         # Header
@@ -59,6 +59,39 @@ class DashboardScreen(Screen):
         tribunal_layout.add_widget(self.tribunal_type_spinner)
         tribunal_layout.add_widget(self.tribunal_spinner)
 
+        # Modo de consulta selector - NOVO
+        consulta_mode_layout = BoxLayout(
+            orientation='horizontal',
+            spacing=dp(10),
+            size_hint=(1, 0.08),
+            padding=[dp(10), 0, dp(10), 0]
+        )
+
+        mode_label = Label(
+            text="Tipo de Consulta:",
+            size_hint=(0.25, 1),
+            font_size='14sp'
+        )
+
+        self.mode_toggle = ToggleButton(
+            text="Número do Processo",
+            group='consulta_mode',
+            state='down',
+            size_hint=(0.375, 1)
+        )
+        self.mode_toggle.bind(on_press=lambda x: self.set_consulta_mode("processo"))
+
+        self.oab_toggle = ToggleButton(
+            text="Número da OAB",
+            group='consulta_mode',
+            size_hint=(0.375, 1)
+        )
+        self.oab_toggle.bind(on_press=lambda x: self.set_consulta_mode("oab"))
+
+        consulta_mode_layout.add_widget(mode_label)
+        consulta_mode_layout.add_widget(self.mode_toggle)
+        consulta_mode_layout.add_widget(self.oab_toggle)
+
         # Tab buttons
         tab_layout = BoxLayout(size_hint=(1, 0.08), spacing=dp(5))
 
@@ -75,9 +108,9 @@ class DashboardScreen(Screen):
         tab_layout.add_widget(self.atualizacoes_tab)
 
         # Content area
-        self.content_area = BoxLayout(orientation='vertical', size_hint=(1, 0.74))
+        self.content_area = BoxLayout(orientation='vertical', size_hint=(1, 0.66))
 
-        # Initialize screens with current tribunal
+        # Initialize screens
         self.consulta_screen = ConsultaScreen(
             favorites_store=self.favorites_store,
             selected_tribunal=self.current_tribunal
@@ -87,16 +120,18 @@ class DashboardScreen(Screen):
 
         self.content_area.add_widget(self.consulta_screen)
 
+        # Adicionar todos os widgets ao layout principal
         layout.add_widget(header)
         layout.add_widget(tribunal_layout)
+        layout.add_widget(consulta_mode_layout)  # Adicionar o seletor de modo
         layout.add_widget(tab_layout)
         layout.add_widget(self.content_area)
 
+        # IMPORTANTE: Adicionar layout ao screen APENAS UMA VEZ
         self.add_widget(layout)
 
     def get_tribunals_for_type(self, tribunal_type):
         """Get list of tribunals for a given type"""
-        from app.api.config import TRIBUNAL_URLS
         if tribunal_type in TRIBUNAL_URLS:
             return list(TRIBUNAL_URLS[tribunal_type].keys())
         return []
@@ -125,6 +160,12 @@ class DashboardScreen(Screen):
         # Update consulta screen if it's active
         if hasattr(self, 'consulta_screen'):
             self.consulta_screen.update_selected_tribunal(tribunal)
+
+    def set_consulta_mode(self, mode):
+        """Define o modo de consulta (processo ou OAB)"""
+        # Atualizar a tela de consulta
+        if hasattr(self, 'consulta_screen'):
+            self.consulta_screen.set_consulta_mode(mode)
 
     def show_consulta(self, instance):
         # Ensure consulta screen has current tribunal
